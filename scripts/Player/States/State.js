@@ -1,7 +1,8 @@
 export const states = {
-    RUNNING: 0,
-    SITTING: 1,
-    JUMPING: 2
+    SITTING: 0,
+    RUNNING: 1,
+    JUMPING: 2,
+    FALLING: 3
 };
 
 export default class State {
