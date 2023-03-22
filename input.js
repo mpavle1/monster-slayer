@@ -5,6 +5,7 @@ export class InputHandler {
     constructor() {
         this.keys = [];
         window.addEventListener('keydown', (e) => {
+            console.log(e.key);
             if (validInputs.includes(e.key) && !this.keys.includes(e.key)) {
                 this.keys.push(e.key);
             }
