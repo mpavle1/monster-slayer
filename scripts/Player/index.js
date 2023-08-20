@@ -11,14 +11,14 @@ export default class Player {
     this.y = this.game.height - this.height - this.game.groundMargin;
 
     this.xSpeed = 0;
-    this.maxXSpeed = 10;
+    this.maxXSpeed = 6;
 
     this.ySpeed = 0;
     this.weight = 1;
 
-    this.fps = 30; // tehnicki FPS za animaicju, ali sto je veci onda se brze menja stanje
+    this.fps = 25; // tehnicki FPS za animaicju, ali sto je veci onda se brze menja stanje
     this.frameInterval = 1000 / this.fps;
-    this.frameTimer = 0;
+    this.frameTimer = 0; // prati koliko frame-ova je proslo od proslog update-a i kasnije sluzi da se proveri da li treba da se update frame
     this.frameX = 0;
     this.frameY = 0;
     this.maxFrame = 5;
@@ -33,12 +33,19 @@ export default class Player {
     this.currentState.enter();
   }
 
-  update(keys, deltaTime) {
-    this.currentState.handleInput(keys);
+  onGround() {
+    return this.y >= this.game.height - this.height - this.game.groundMargin;
+  }
 
+  #renderDebugMode(context) {
+    if (this.game.debugMode) {
+      context.strokeRect(this.x, this.y, this.width, this.height);
+    }
+  }
+
+  #updateHorizontalMovement(keys) {
     this.x += this.xSpeed;
 
-    // horizontalno kretanje
     if (keys.includes("ArrowRight")) {
       this.xSpeed = this.maxXSpeed;
     } else if (keys.includes("ArrowLeft")) {
@@ -54,31 +61,60 @@ export default class Player {
     if (this.x > this.game.width - this.width) {
       this.x = this.game.width - this.width;
     }
+  }
 
-    // vertikalno kretanje
-
+  #updateVerticalMovement() {
     this.y += this.ySpeed;
 
-    if (!this.onGround()) {
-      this.ySpeed += this.weight;
-    } else {
+    if (this.onGround()) {
       this.ySpeed = 0;
+      this.y = this.game.height - this.height - this.game.groundMargin;
+      return;
     }
 
-    if (this.frameTimer > this.frameInterval) {
-      this.frameTimer = 0;
-      if (this.frameX < this.maxFrame) {
-        this.frameX++;
-      } else {
-        this.frameX = 0;
-      }
-    } else {
+    if (this.currentState instanceof Falling) {
+      this.ySpeed += this.weight * 0.5;
+      return;
+    }
+  
+    this.ySpeed += this.weight;
+  }
+
+  #updateFrames(deltaTime) {
+    if (this.frameTimer <= this.frameInterval) {
       this.frameTimer += deltaTime;
+      return;
+    }
+
+    this.frameTimer = 0;
+    if (this.frameX < this.maxFrame) {
+      this.frameX++;
+    } else {
+      this.frameX = 0;
     }
   }
 
-  onGround() {
-    return this.y >= this.game.height - this.height - this.game.groundMargin;
+  #checkCollisions() {
+    this.game.enemies.forEach((enemy) => {
+      if (
+        enemy.x < this.x + this.width &&
+        enemy.x + enemy.width > this.x &&
+        enemy.y < this.y + this.height &&
+        enemy.y + enemy.height > this.y
+      ) {
+        enemy.shouldDeleted = true;
+        this.game.score++;
+      } else {
+      }
+    });
+  }
+
+  update(keys, deltaTime) {
+    this.#checkCollisions();
+    this.currentState.handleInput(keys);
+    this.#updateHorizontalMovement(keys);
+    this.#updateVerticalMovement();
+    this.#updateFrames(deltaTime);
   }
 
   setState(state, speed) {
@@ -88,6 +124,7 @@ export default class Player {
   }
 
   render(context) {
+    this.#renderDebugMode(context);
     context.drawImage(
       this.image,
       this.frameX * this.width,

@@ -9,7 +9,7 @@ export default class Enemy {
   }
 
   update(deltaTime) {
-    this.x -= (this.speedX + this.game.speed);
+    this.x -= this.speedX + this.game.speed;
     this.y += this.speedY;
 
     if (this.frameTimer > this.frameInterval) {
@@ -26,15 +26,22 @@ export default class Enemy {
     if (this.x + this.width < 0) {
         this.shouldDeleted = true;
     }
+  }
 
-    // pobrisati ako izajde po y osi sa ekrana
-
-    // if (this.y + this.width < 0) {
-    //     this.shouldDeleted = true;
-    // }
+  #renderDebugMode(context) {
+    if (this.game.debugMode) {
+      context.strokeRect(
+        this.x,
+        this.y,
+        this.width,
+        this.height
+      );
+    }
   }
 
   render(context) {
+    this.#renderDebugMode(context);
+
     context.drawImage(
         this.image,
         this.frameX * this.width,

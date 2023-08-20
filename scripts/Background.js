@@ -38,7 +38,7 @@ class Layer {
 export default class Background {
   constructor(game) {
     this.game = game;
-        this.width = 1667;
+    this.width = 1667;
     this.height = 500;
 
     this.layer1 = new Layer(

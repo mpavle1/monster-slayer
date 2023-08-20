@@ -8,7 +8,7 @@ export default class Jumping extends State {
 
     enter() {
         if (this.player.onGround()) {
-            this.player.ySpeed -= 20;
+            this.player.ySpeed -= 25;
         }
         this.player.frameX = 0;
         this.player.frameY = 1;
