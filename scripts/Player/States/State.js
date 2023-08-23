@@ -9,7 +9,8 @@ export const states = {
 };
 
 export default class State {
-    constructor(state) {
+    constructor(state, game) {
         this.state = state;
+        this.game = game;
     }
 }

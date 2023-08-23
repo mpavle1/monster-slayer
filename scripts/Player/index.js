@@ -1,4 +1,5 @@
-import { Sitting, Running, Jumping, Falling } from "./States/index.js";
+import { Sitting, Running, Jumping, Falling, Rolling, Diving, Hit, states } from "./States/index.js";
+import Collision from "../Animation/Collision.js";
 
 export default class Player {
   constructor(game) {
@@ -24,13 +25,14 @@ export default class Player {
     this.maxFrame = 5;
 
     this.states = [
-      new Sitting(this),
-      new Running(this),
-      new Jumping(this),
-      new Falling(this),
+      new Sitting(this.game),
+      new Running(this.game),
+      new Jumping(this.game),
+      new Falling(this.game),
+      new Rolling(this.game),
+      new Diving(this.game),
+      new Hit(this.game),
     ];
-    this.currentState = this.states[0];
-    this.currentState.enter();
   }
 
   onGround() {
@@ -103,8 +105,18 @@ export default class Player {
         enemy.y + enemy.height > this.y
       ) {
         enemy.shouldDeleted = true;
-        this.game.score++;
-      } else {
+        this.game.collisions.push(
+          new Collision(
+            this.game,
+            enemy.x + enemy.width * 0.5,
+            enemy.y + enemy.height * 0.5
+          )
+        );
+        if ([this.states[4], this.states[5]].includes(this.currentState)) {
+          this.game.score++;
+        } else {
+          this.setState(states.HIT, 0);
+        }
       }
     });
   }
